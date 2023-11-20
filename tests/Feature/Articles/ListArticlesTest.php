@@ -14,7 +14,7 @@ class ListArticlesTest extends TestCase
     /** @test */
     public function can_fetch_a_single_article(): void
     {
-        $this->withoutExceptionHandling();
+        // $this->withoutExceptionHandling();
 
         $article = Article::factory()->create();
 
@@ -39,7 +39,7 @@ class ListArticlesTest extends TestCase
     /** @test */
     public function can_fetch_all_articles(): void
     {
-        $this->withoutExceptionHandling();
+        // $this->withoutExceptionHandling();
 
         $articles = Article::factory(3)->create();
 

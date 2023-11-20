@@ -16,7 +16,15 @@ class ArticleController extends Controller
         return ArticleCollection::make(Article::all());
     }
 
-    function create(Request $request) {
+    function create(Request $request)
+    {
+
+        $request->validate([
+            'data.attributes.title' => 'required|min:4',
+            'data.attributes.slug' => 'required',
+            'data.attributes.content' => 'required'
+        ]);
+
 
         $article = Article::create([
             'title' => $request->input('data.attributes.title'),
