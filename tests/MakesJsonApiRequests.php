@@ -5,19 +5,45 @@ namespace Tests;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Assert as PHPUnit;
 use PHPUnit\Framework\ExpectationFailedException;
+use Illuminate\Support\Str;
 
 trait MakesJsonApiRequests
 {
+
+    protected bool $formatJsonApiDocument = true;
 
     protected function setUp(): void{
         parent::setUp();
         TestResponse::macro('assertJsonApiValidationErrors',$this->assertJsonApiValidationErrors());
     }
 
+    public function withoutJsonApiDocumentFormatting(){
+        $this->formatJsonApiDocument = false;
+    }
+
     public function json($method, $uri, array $data = [], array $headers = [], $options = 0): TestResponse
     {
         $headers['accept'] = 'application/vnd.api+json';
-        return parent::json($method, $uri, $data, $headers,$options);
+
+        if($this->formatJsonApiDocument){
+            $formattedData = $this->getFormattedData($uri,$data);
+        }
+
+        return parent::json($method, $uri, $formattedData ?? $data, $headers,$options);
+    }
+
+    protected function getFormattedData($uri,array $data):array
+    {
+        $path = parse_url($uri)['path'];
+        $type = (string) Str::of($path)->after('api/v1/')->before('/');
+        $id = (string) Str::of($path)->after($type)->replace('/','');
+        return [
+            'data' => array_filter([
+                'type' => $type,
+                'id' => $id,
+                'attributes' => $data
+            ])
+        ];
     }
 
     public function postJson($uri, array $data = [], array $headers = [], $options = 0): TestResponse
@@ -37,9 +63,10 @@ trait MakesJsonApiRequests
     protected function assertJsonApiValidationErrors(){
         return function($attribute){
             /** @var TestResponse $this */
+            $pointer = Str::of($attribute)->startsWith('data') ? "/".str_replace('.','/',$attribute) : "/data/attributes/{$attribute}";
             try {
                 $this->assertJsonFragment([
-                    'source' => ['pointer'=> "/data/attributes/{$attribute}"]
+                    'source' => ['pointer'=> $pointer]
                 ]);
             } catch (ExpectationFailedException $e) {
                 PHPUnit::fail(

@@ -16,7 +16,7 @@ class ArticleController extends Controller
         return ArticleCollection::make(Article::all());
     }
 
-    function create(Request $request)
+    function store(Request $request)
     {
 
         $request->validate([
@@ -36,6 +36,22 @@ class ArticleController extends Controller
 
     function show(Article $article): ArticleResource
     {
+        return ArticleResource::make($article);
+    }
+
+    function update(Article $article, Request $request) {
+
+        $request->validate([
+            'data.attributes.title' => 'required|min:4',
+            'data.attributes.slug' => 'required',
+            'data.attributes.content' => 'required'
+        ]);
+
+        $article->update([
+            'title' => $request->input('data.attributes.title'),
+            'slug' => $request->input('data.attributes.slug'),
+            'content' => $request->input('data.attributes.content')
+        ]);
         return ArticleResource::make($article);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\ValidateJsonApiDocument;
 use App\Http\Middleware\ValidateJsonApiHeaders;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
@@ -43,7 +44,8 @@ class Kernel extends HttpKernel
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            ValidateJsonApiHeaders::class
+            ValidateJsonApiHeaders::class,
+            ValidateJsonApiDocument::class,
         ],
     ];
 
